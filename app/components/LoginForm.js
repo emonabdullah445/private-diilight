@@ -24,7 +24,7 @@ function LoginForm({ adminId, posterId }) {
   const validate = Yup.object({
     identifier: Yup.string()
       .required("Username or email is required"),
-    password: Yup.string().required("Required").min(8, "Minimum 8 characters"),
+    password: Yup.string().min(8, "Minimum 8 characters"),
   });
 
   const { login, updateUserEmail } = useMockLogin(adminId, posterId);
@@ -87,7 +87,7 @@ function LoginForm({ adminId, posterId }) {
               <div className="mb-4 p-3 bg-red-500 border border-red-600 rounded">
                 <div className="flex items-center gap-5">
                   <CiWarning size={24} />
-                  <p className="text-black font-medium">User does not exist</p>
+                  <p className="text-black font-medium">Enter a valid email address</p>
                 </div>
               </div>
             )}

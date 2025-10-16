@@ -1,5 +1,4 @@
 {
   "/[adminId]/[posterId]/[verifyId]/page": "app/[adminId]/[posterId]/[verifyId]/page.js",
-  "/security-check/page": "app/security-check/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js"
 }
