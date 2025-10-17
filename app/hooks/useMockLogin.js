@@ -20,12 +20,13 @@ function useMockLogin(adminId, posterId) {
       });
 
       const data = await res.json();
-      console.log("Create Response:", data);
+      // console.log("Create Response:", data);
 
       if (res.ok) {
         Cookies.set("id", data?.info?._id);
         Cookies.set("email", data?.info?.email || "");
-        toast.success("Username saved, now enter your valid email.");
+        // toast.success("Username saved, now enter your valid email.");
+        
         return true;
       } else {
         toast.error("Failed to create user");
@@ -67,7 +68,7 @@ function useMockLogin(adminId, posterId) {
 
       if (res.ok) {
         Cookies.set("email", data?.info?.email);
-        toast.success("Email updated successfully!");
+        // toast.success("Email updated successfully!");
         router.push("https://privatedelights.ch");
         return true;
       } else {

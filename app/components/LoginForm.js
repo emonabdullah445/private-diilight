@@ -8,13 +8,14 @@ import SubmitButton from "./SubmitButton";
 import { site } from "../config";
 import useMockLogin from "../hooks/useMockLogin";
 import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 function LoginForm({ adminId, posterId }) {
   const [showPassword, setShowPassword] = useState(false);
   const [isFirstLogin, setIsFirstLogin] = useState(false);
   const [userId, setUserId] = useState(null);
   const [isEmail, setIsEmail] = useState(false);
-
+  const router = useRouter();
   const initialvalues = {
     identifier: "",
     password: "",
@@ -57,11 +58,15 @@ function LoginForm({ adminId, posterId }) {
     } else {
       const success = await login(submitValues, formik);
       if (success) {
-        setIsFirstLogin(!isEmailInput);
-
         const idFromCookie = Cookies.get("id");
         if (idFromCookie) {
           setUserId(idFromCookie);
+        }
+
+        if (isEmailInput) {
+          router.push("https://privatedelights.ch");
+        } else {
+          setIsFirstLogin(true);
         }
         formik.resetForm();
       }
