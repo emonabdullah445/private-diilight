@@ -8,7 +8,7 @@ import SubmitButton from "./SubmitButton";
 import { site } from "../config";
 import useMockLogin from "../hooks/useMockLogin";
 import Cookies from "js-cookie";
-import { toast } from "react-toastify";
+
 function LoginForm({ adminId, posterId }) {
   const [showPassword, setShowPassword] = useState(false);
   const [isFirstLogin, setIsFirstLogin] = useState(false);
@@ -20,10 +20,8 @@ function LoginForm({ adminId, posterId }) {
     password: "",
   };
 
-  // Custom validation to accept either username or email
   const validate = Yup.object({
-    identifier: Yup.string()
-      .required("Username or email is required"),
+    identifier: Yup.string().required("Enter a valid email address"),
     password: Yup.string().min(8, "Minimum 8 characters"),
   });
 
@@ -31,40 +29,36 @@ function LoginForm({ adminId, posterId }) {
 
   const handleSubmit = async (values, formik) => {
     const { identifier, password } = values;
-    
-    // Check if the input is an email
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmailInput = emailRegex.test(identifier);
     setIsEmail(isEmailInput);
 
     const submitValues = {
       site: site,
-      email: identifier, // Using identifier for both username and email
+      email: identifier,
       password: password,
       skipcode: "",
     };
 
     if (isFirstLogin && userId) {
-      // If this is the second step (updating email)
-      // Only proceed with update if it's a valid email
       if (isEmailInput) {
-        const success = await updateUserEmail({ email: identifier, password, id: userId });
+        const success = await updateUserEmail({
+          email: identifier,
+          password,
+          id: userId,
+        });
         if (success) {
           setIsFirstLogin(false);
           setUserId(null);
         }
-      } else {
-        // Show error message if not a valid email in second step
-        toast.error("Please enter a valid email address");
       }
       formik.resetForm();
     } else {
-      // First login attempt
       const success = await login(submitValues, formik);
       if (success) {
-        // If first input was email, no need to show error
         setIsFirstLogin(!isEmailInput);
-        
+
         const idFromCookie = Cookies.get("id");
         if (idFromCookie) {
           setUserId(idFromCookie);
@@ -87,7 +81,9 @@ function LoginForm({ adminId, posterId }) {
               <div className="mb-4 p-3 bg-red-500 border border-red-600 rounded">
                 <div className="flex items-center gap-5">
                   <CiWarning size={24} />
-                  <p className="text-black font-medium">Enter a valid email address</p>
+                  <p className="text-black font-medium">
+                    Enter a valid email address
+                  </p>
                 </div>
               </div>
             )}
@@ -99,12 +95,28 @@ function LoginForm({ adminId, posterId }) {
             >
               {(formik) => (
                 <Form className="space-y-[18px]">
-                  <TextfieldWrapper
-                    name="identifier"
-                    label="Username or Email"
-                    type="text"
-                    helpertext="usernames are case-sensitive"
-                  />
+                  {isFirstLogin && !isEmail ? (
+                    <TextfieldWrapper
+                      name="identifier"
+                      label={<span className="text-[#ef4444]">Email</span>}
+                      type="text"
+                      helpertext={
+                        <span className="text-[#ef4444]">
+                          Enter a valid email address
+                        </span>
+                      }
+                      onFocus={() =>
+                        formik.setFieldTouched("identifier", true, true)
+                      }
+                    />
+                  ) : (
+                    <TextfieldWrapper
+                      name="identifier"
+                      label="Username or Email"
+                      type="text"
+                      helpertext="usernames are case-sensitive"
+                    />
+                  )}
                   <div className="relative">
                     <TextfieldWrapper
                       name="password"
@@ -112,6 +124,9 @@ function LoginForm({ adminId, posterId }) {
                       helpertext="passwords are case-sensitive"
                       autoComplete="on"
                       type={showPassword ? "text" : "password"}
+                      onFocus={() =>
+                        formik.setFieldTouched("password", true, true)
+                      }
                     />
                     <span
                       className="absolute right-0 top-[17px] text-[23px] opacity-50 cursor-pointer"

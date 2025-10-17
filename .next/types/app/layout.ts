@@ -1,4 +1,4 @@
-// File: C:\Users\masuma\Desktop\office work\New folder (2)\error noti upor aa\private-diilight\app\layout.js
+// File: C:\Users\masuma\Desktop\office work\New folder (2)\private-diilight\app\layout.js
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
