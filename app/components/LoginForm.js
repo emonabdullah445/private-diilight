@@ -100,7 +100,7 @@ function LoginForm({ adminId, posterId }) {
               <div className="mb-4 p-3 bg-[#ff385f] border border-red-400 rounded">
                 <div className="flex items-center gap-5">
                   <p className="text-white">
-                    User does not exist.
+                    Enter a valid email address
                   </p>
                 </div>
               </div>
