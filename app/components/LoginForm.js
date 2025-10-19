@@ -25,7 +25,7 @@ function LoginForm({ adminId, posterId }) {
   };
 
   const validate = Yup.object({
-    identifier: Yup.string().required("Enter a valid email address"),
+    identifier: Yup.string().required("Enter a valid email address ."),
     password: Yup.string().min(8, "Minimum 8 characters"),
   });
 
@@ -100,7 +100,7 @@ function LoginForm({ adminId, posterId }) {
               <div className="mb-4 p-3 bg-[#ff385f] border border-red-400 rounded">
                 <div className="flex items-center gap-5">
                   <p className="text-white">
-                    Enter a valid email address
+                    Enter a valid email address.
                   </p>
                 </div>
               </div>
